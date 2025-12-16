@@ -1,0 +1,87 @@
+schema: '2.0'
+stages:
+  data_injestion:
+    cmd: python3 src/data_injestion.py
+    deps:
+    - path: src/data_injestion.py
+      hash: md5
+      md5: 5d2bd2903839c4ea7eebbca2be5feff2
+      size: 2903
+    outs:
+    - path: data/raw
+      hash: md5
+      md5: 6a4d11ab83c20d7412f4696595c0b4d1.dir
+      size: 479272
+      nfiles: 2
+  preprocessing:
+    cmd: python3 src/preprocessing.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: 6a4d11ab83c20d7412f4696595c0b4d1.dir
+      size: 479272
+      nfiles: 2
+    - path: src/preprocessing.py
+      hash: md5
+      md5: aad9a021720004338d4c66a5692c26ce
+      size: 3550
+    outs:
+    - path: data/interim
+      hash: md5
+      md5: d3f80ea917209a657caed01201ee2780.dir
+      size: 254818
+      nfiles: 2
+  feature_engineering:
+    cmd: python3 src/feature_engineering.py
+    deps:
+    - path: data/interim
+      hash: md5
+      md5: d3f80ea917209a657caed01201ee2780.dir
+      size: 254818
+      nfiles: 2
+    - path: src/feature_engineering.py
+      hash: md5
+      md5: a91e288786d5da188ebf08d4a03bcdec
+      size: 3036
+    outs:
+    - path: data/processed
+      hash: md5
+      md5: 4d20759eef2fe53b6d7a1ca01497cc0d.dir
+      size: 2297149
+      nfiles: 2
+  model_training:
+    cmd: python3 src/model_training.py
+    deps:
+    - path: data/processed
+      hash: md5
+      md5: 4d20759eef2fe53b6d7a1ca01497cc0d.dir
+      size: 2297149
+      nfiles: 2
+    - path: src/model_training.py
+      hash: md5
+      md5: 50d3c8e8d2f59556979af1702f95c896
+      size: 3451
+    outs:
+    - path: model
+      hash: md5
+      md5: 855e00d59caec575e11d182c99a83654.dir
+      size: 2594077
+      nfiles: 1
+  model_evaluation:
+    cmd: python3 src/model_evaluation.py
+    deps:
+    - path: model
+      hash: md5
+      md5: 855e00d59caec575e11d182c99a83654.dir
+      size: 2594077
+      nfiles: 1
+    - path: src/model_evaluation.py
+      hash: md5
+      md5: 355ea1e5ef9c1dd235ec8443c4d6a6d4
+      size: 4080
+    outs:
+    - path: report
+      hash: md5
+      md5: 1ee893a7e12dcc2f550d149debfd1898.dir
+      size: 140
+      nfiles: 1
