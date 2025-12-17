@@ -3,6 +3,9 @@ import pandas as pd
 import json
 import logging
 import pickle
+import yaml
+from dvclive import Live
+
 import numpy as np
 from sklearn.metrics import accuracy_score,precision_score,recall_score,roc_auc_score
 
@@ -25,6 +28,29 @@ console_handeller.setFormatter(formatter)
 
 logger.addHandler(file_handeller)
 logger.addHandler(console_handeller)
+
+def load_params(params_path:str)->dict:
+    '''
+    Docstring for load_params
+    
+    :param params_path: path of your parameter yaml file
+    :type params_path: str
+    :return: dictionary of parameter of this python file
+    :rtype: dict
+    '''
+    try:
+        with open(params_path , 'r') as file:
+            params=yaml.safe_load(file)
+        logger.debug("Parameter are succesfully loaded")
+        return params
+    
+    except FileNotFoundError as e:
+        logger.error("File not found error has occured as %s",e)
+        raise
+    except Exception as e:
+        logger.error("Unexpected error has occured as %s",e)
+        raise
+
 
 def load_model(file_path:str):
     '''
@@ -127,12 +153,20 @@ def save_metrices(metrices:dict,file_path:str)->None:
 
 def main():
     try:
+        params=load_params("./params.yaml")
         clf=load_model("./model/model.pkl")
         test_data=load_data("./data/processed/test_tifd.csv")
         X_test=test_data.iloc[:,:-1].values
         y_test=test_data.iloc[:,-1].values
         metrices=evaluate_model(clf=clf,X_test=X_test,y_test=y_test)
-        save_metrices(metrices=metrices, file_path="report/metrices.json")
+        
+        with Live(save_dvc_exp=True) as live:
+            live.log_metric("Accuracy", metrices["accuracy"])
+            live.log_metric("Precision", metrices["precision"])
+            live.log_metric("Recall", metrices["recall"])
+            live.log_metric("auc",metrices["auc"])
+            live.log_params(params)
+        save_metrices(metrices=metrices, file_path="./report/metrices.json")
         logger.debug("Metrices are sucessfully saved")
         
     except Exception as e:

@@ -3,6 +3,8 @@ stages:
     cmd: python3 src/data_injestion.py
     deps:
     - src/data_injestion.py
+    params:
+    - data_injestion.test_size
     outs:
     - data/raw
 
@@ -19,6 +21,8 @@ stages:
     deps:
     - src/feature_engineering.py
     - data/interim
+    params:
+    - feature_engineering.max_features
     outs:
     - data/processed
 
@@ -27,9 +31,12 @@ stages:
     deps:
     - src/model_training.py
     - data/processed
+    params:
+    - model_training.random_state
+    - model_training.n_estimators
     outs:
     - model
-  
+
   model_evaluation:
     cmd: python3 src/model_evaluation.py
     deps:
@@ -38,3 +45,10 @@ stages:
     outs:
     - report
 
+metrics:
+- dvclive/metrics.json
+plots:
+- dvclive/plots/metrics:
+    x: step
+params:
+- dvclive/params.yaml
